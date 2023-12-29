@@ -1,41 +1,43 @@
 import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
-import { connect } from "react-redux";
-import * as authorActions from "../../redux/actions/authorActions";
-import * as courseActions from "../../redux/actions/courseActions";
-import CourseForm from "./CourseForm";
-import { newCourse } from "../../../tools/mockData";
-import Spinner from "../common/Spinner";
+import { useParams } from "react-router-dom/cjs/react-router-dom";
 import { toast } from "react-toastify";
+import { newCourse } from "../../../tools/mockData";
+import {
+  useFetchCoursesQuery,
+  useSaveCourseMutation,
+} from "../../features/courses/courses-api-slice";
+import { useAppDispatch, useAppSelector } from "../../hooks";
+import CourseForm from "./CourseForm";
+import Spinner from "../common/Spinner";
+import { loadAuthors } from "../../redux/slices/author-slice";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
-export function ManageCoursePage({
-  courses,
-  authors,
-  loadAuthors,
-  loadCourses,
-  saveCourse,
-  history,
-  ...props
-}) {
-  const [course, setCourse] = useState({ ...props.course });
+export function ManageCoursePage() {
+  const dispatch = useAppDispatch();
+  const { authors, status: authorsFetchStatus } = useAppSelector(
+    (state) => state.author
+  );
+  const { slug } = useParams();
+  const history = useHistory();
+  const { initialCourse, isFetchingCourses } = useFetchCoursesQuery(undefined, {
+    selectFromResult: ({ data, isFetching }) => ({
+      initialCourse: data?.find((course) => course.slug === slug),
+      isFetchingCourses: isFetching,
+    }),
+  });
+  const [saveCourse, { isLoading: isSaving }] = useSaveCourseMutation();
+  const [course, setCourse] = useState(newCourse);
   const [errors, setErrors] = useState({});
-  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    if (courses.length === 0) {
-      loadCourses().catch((error) => {
-        alert("Loading courses failed", error);
-      });
-    } else {
-      setCourse({ ...props.course });
-    }
-
     if (authors.length === 0) {
-      loadAuthors().catch((error) => {
-        alert("Loading authors failed", error);
-      });
+      dispatch(loadAuthors());
     }
-  }, [props.course]);
+    if (initialCourse) {
+      setCourse(initialCourse);
+    }
+  }, [initialCourse]);
 
   function handleChange(event) {
     const { name, value } = event.target;
@@ -57,22 +59,19 @@ export function ManageCoursePage({
     return Object.keys(errors).length === 0;
   }
 
-  function handleSave(event) {
+  async function handleSave(event) {
     event.preventDefault();
     if (!formIsValid()) return;
-    setSaving(true);
-    saveCourse(course)
-      .then(() => {
-        toast.success("Course saved");
-        history.push("/courses");
-      })
-      .catch((error) => {
-        setSaving(false);
-        setErrors({ onSave: error.message });
-      });
+    try {
+      await saveCourse(course);
+      toast.success("Course saved");
+      history.push("/courses");
+    } catch (error) {
+      setErrors({ onSave: error.message });
+    }
   }
 
-  return authors.length === 0 || courses.length === 0 ? (
+  return isFetchingCourses || authorsFetchStatus === "loading" ? (
     <Spinner />
   ) : (
     <CourseForm
@@ -81,43 +80,13 @@ export function ManageCoursePage({
       authors={authors}
       onChange={handleChange}
       onSave={handleSave}
-      saving={saving}
+      saving={isSaving}
     />
   );
 }
 
 ManageCoursePage.propTypes = {
-  course: PropTypes.object.isRequired,
-  courses: PropTypes.array.isRequired,
-  authors: PropTypes.array.isRequired,
-  loadCourses: PropTypes.func.isRequired,
-  loadAuthors: PropTypes.func.isRequired,
-  saveCourse: PropTypes.func.isRequired,
   history: PropTypes.object.isRequired,
 };
 
-export function getCourseBySlug(courses, slug) {
-  // redux selectors
-  return courses.find((course) => course.slug === slug) || null;
-}
-
-function mapStateToProps(state, ownProps) {
-  const slug = ownProps.match.params.slug;
-  const course =
-    slug && state.courses.length > 0
-      ? getCourseBySlug(state.courses, slug)
-      : newCourse;
-  return {
-    course,
-    courses: state.courses,
-    authors: state.authors,
-  };
-}
-
-const mapDispatchToProps = {
-  loadCourses: courseActions.loadCourses,
-  loadAuthors: authorActions.loadAuthors,
-  saveCourse: courseActions.saveCourse,
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(ManageCoursePage);
+export default ManageCoursePage;
