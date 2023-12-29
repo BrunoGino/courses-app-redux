@@ -10,7 +10,7 @@ import {
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import CourseForm from "./CourseForm";
 import Spinner from "../common/Spinner";
-import { loadAuthors } from "../../redux/slices/author-slice";
+import { loadAuthors } from "../../features/courses/author-slice";
 import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 
 export function ManageCoursePage() {

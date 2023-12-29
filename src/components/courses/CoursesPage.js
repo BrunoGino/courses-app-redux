@@ -6,7 +6,7 @@ import {
   useFetchCoursesQuery,
 } from "../../features/courses/courses-api-slice";
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import { loadAuthors } from "../../redux/slices/author-slice";
+import { loadAuthors } from "../../features/courses/author-slice";
 import Spinner from "../common/Spinner";
 import CourseList from "./CourseList";
 

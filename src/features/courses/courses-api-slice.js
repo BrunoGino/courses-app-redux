@@ -17,7 +17,7 @@ export const coursesApiSlice = createApi({
       query() {
         return "/courses";
       },
-      providesTags: (result, _error, _arg) =>
+      providesTags: (result) =>
         result.data
           ? [
               ...result.map(({ slug }) => ({ type: "Courses", slug })),
