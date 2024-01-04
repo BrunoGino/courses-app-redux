@@ -1,12 +1,10 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-const baseUrl = process.env.API_URL;
-
 export const coursesApiSlice = createApi({
   reducerPath: "courses-api",
   tagTypes: ["Courses"],
   baseQuery: fetchBaseQuery({
-    baseUrl,
+    baseUrl: "http://localhost:3001",
     prepareHeaders(headers) {
       headers.set("content-type", "application/json");
       return headers;
@@ -55,3 +53,4 @@ export const {
   useSaveCourseMutation,
   useDeleteCourseMutation,
 } = coursesApiSlice;
+export default coursesApiSlice.reducer;

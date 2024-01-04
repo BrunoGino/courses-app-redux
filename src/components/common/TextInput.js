@@ -9,9 +9,10 @@ const TextInput = ({ name, label, onChange, placeholder, value, error }) => {
 
   return (
     <div className={wrapperClass}>
-      <label htmlFor={name}>{label}</label>
+      <label id={name}>{label}</label>
       <div className="field">
         <input
+          aria-labelledby={name}
           type="text"
           name={name}
           className="form-control"
@@ -31,7 +32,7 @@ TextInput.propTypes = {
   onChange: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
   value: PropTypes.string,
-  error: PropTypes.string
+  error: PropTypes.string,
 };
 
 export default TextInput;

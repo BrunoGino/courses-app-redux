@@ -1,19 +1,18 @@
-import PropTypes from "prop-types";
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom/cjs/react-router-dom";
+import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { toast } from "react-toastify";
 import { newCourse } from "../../../tools/mockData";
+import { loadAuthors } from "../../features/courses/author-slice";
 import {
   useFetchCoursesQuery,
   useSaveCourseMutation,
 } from "../../features/courses/courses-api-slice";
 import { useAppDispatch, useAppSelector } from "../../hooks";
-import CourseForm from "./CourseForm";
 import Spinner from "../common/Spinner";
-import { loadAuthors } from "../../features/courses/author-slice";
-import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
+import CourseForm from "./CourseForm";
 
-export function ManageCoursePage() {
+function ManageCoursePage() {
   const dispatch = useAppDispatch();
   const { authors, status: authorsFetchStatus } = useAppSelector(
     (state) => state.author
@@ -84,9 +83,5 @@ export function ManageCoursePage() {
     />
   );
 }
-
-ManageCoursePage.propTypes = {
-  history: PropTypes.object.isRequired,
-};
 
 export default ManageCoursePage;
